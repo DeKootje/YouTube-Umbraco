@@ -177,7 +177,7 @@ module.exports = function (grunt) {
   });
 
   //Main Grunt Task
-  grunt.registerTask('default', ['jshint', 'concat', 'less', 'cssmin', 'copy:config', 'copy:views', 'usebanner']);
+  grunt.registerTask('default', ['concat', 'less', 'cssmin', 'copy:config', 'copy:views', 'usebanner']);
 
   //Test Task
   grunt.registerTask('test', 'Clean, copy test assets, test', function () {

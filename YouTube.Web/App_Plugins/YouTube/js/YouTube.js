@@ -35,15 +35,19 @@ angular.module("umbraco").controller("YouTube.channel.controller", function ($sc
 
     $scope.toggleVideo = function (video) {
 
+        if (!$scope.model.value.length) {
+            return false;
+        }
+
         //Create new JSON object as we don't need full object passed in here
         var newVideoObject = {
-            "id": video.id.videoId,
-            "type": "video",
-            "title": video.snippet.title
+            "Id": video.id.videoId,
+            "Type": "video",
+            "Title": video.snippet.title
         };
 
         //See if we can find the item or not in the array
-        var tryFindItem = $scope.model.value.map(function (e) { return e.id; }).indexOf(newVideoObject.id);
+        var tryFindItem = $scope.model.value.map(function (e) { return e.Id; }).indexOf(newVideoObject.Id);
 
         //Check validity of min & max items
         var minValid = isMinValid();
@@ -67,16 +71,20 @@ angular.module("umbraco").controller("YouTube.channel.controller", function ($sc
     };
 
     $scope.togglePlaylist = function (playlist) {
-        console.log(playlist);
+
+        if (!$scope.model.value.length) {
+            return false;
+        }
+
         //Create new JSON object as we don't need full object passed in here
         var newPlaylistObject = {
-            "id": playlist.id.playlistId,
-            "type": "playlist",
-            "title": playlist.snippet.title
+            "Id": playlist.id.playlistId,
+            "Type": "playlist",
+            "Title": playlist.snippet.title
         };
 
         //See if we can find the item or not in the array
-        var tryFindItem = $scope.model.value.map(function (e) { return e.id; }).indexOf(newPlaylistObject.id);
+        var tryFindItem = $scope.model.value.map(function (e) { return e.Id; }).indexOf(newPlaylistObject.Id);
 
         //Check validity of min & max items
         var minValid = isMinValid();

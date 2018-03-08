@@ -1,4 +1,8 @@
-<div class="YouTubeChannel" ng-controller="YouTube.channel.controller">
+<div class="YouTubeChannel" ng-controller="YouTube.channel.controller" ng-init="init()">
+
+    <div ng-show="model.config.mode == 'video'">
+
+
 
         <!-- Hidden Fields for validation (Needs ng-model for ng-form to pick up these fields) -->
         <input type="hidden" name="minerror" ng-model="errors" />
@@ -34,7 +38,7 @@
         <!-- Video Results -->
         <div class="row-fluid videos" ng-show="hasVideos">
             <input type="hidden" name="selectedVideosError" />
-            <div class="span4" ng-repeat="video in videos.items">
+            <div class="span4" ng-repeat="video in videos.items track by $index">
                 <a href="#" prevent-default ng-click="toggleVideo(video)" ng-class="{selected: isInArray(video.id.videoId)}">
                     <img ng-src="{{video.snippet.thumbnails.medium.url}}" />
                 </a>
@@ -56,20 +60,99 @@
         <div>
             <h4>Selected Videos</h4>
             <ul class="unstyled list-icons" ui-sortable ng-model="model.value">
-                <li ng-repeat="selectedItem in model.value">
+                <li ng-repeat="selectedItem in model.value track by $index">
                     <i class="icon icon-navigation handle"></i>
                     <a href="#" prevent-default ng-click="removeVideo($index)">
                         <i class="icon icon-delete red hover-show"></i>
-                        <i class="icon icon-video hover-hide"></i> 
-                        {{selectedItem.title}}
+                        <i class="icon icon-video hover-hide"></i>
+                        {{selectedItem.Title}}
                     </a>
-                    
+
                 </li>
             </ul>
 
             <div ng-if="model.config.debug === '1'">
                 {{ model.value | json }}
             </div>
-        </div>    
+        </div>
+
+    </div>
+
+    <div ng-show="model.config.mode == 'playlist'">
+        <!-- Hidden Fields for validation (Needs ng-model for ng-form to pick up these fields) -->
+        <input type="hidden" name="minerror" ng-model="errors" />
+        <input type="hidden" name="maxerror" ng-model="errors" />
+
+
+        <!-- Inline error messages that will show or hide -->
+        <div class="alert alert-error" ng-show="propertyForm.minerror.$error.youtubemin">
+            You need to add at least {{model.config.minmax.minValue-model.value.length}} items
+        </div>
+
+        <div class="alert alert-error" ng-show="propertyForm.maxerror.$error.youtubemax">
+            You can only have {{model.config.minmax.maxValue}} items selected
+        </div>
+
+        <!-- Search -->
+        <div>
+            <input type="text" name="textbox" class="umb-editor umb-textstring textstring" placeholder="Search for a playlist in this channel" ng-model="searchQueryPlaylist" />
+            <button class="btn" prevent-default ng-click="getPlaylists('')"><i class="icon icon-search"></i> Search</button>
+        </div>
+
+        <hr />
+
+        <!-- Loading Message - whilst getting playlists -->
+        <div ng-show="!hasPlaylists && !notFoundPlaylists">
+            <h2>Loading</h2>
+        </div>
+
+        <div ng-show="notFoundPlaylists">
+            <h2>No Playlists Found</h2>
+        </div>
+
+        <!-- Video Results -->
+        <div class="row-fluid videos" ng-show="hasPlaylists">
+            <input type="hidden" name="selectedVideosError" />
+            <div class="span4" ng-repeat="playlist in playlists.items track by $index">
+                <a href="#" prevent-default ng-click="togglePlaylist(playlist)" ng-class="{selected: isInArray(playlist.id.playlistId)}">
+                    <img ng-src="{{playlist.snippet.thumbnails.medium.url}}" />
+                </a>
+                <h5>{{ playlist.snippet.title }}</h5>
+            </div>
+        </div>
+
+        <!-- Pagination (Next & Previous only) -->
+        <ul class="pager">
+            <li ng-class="{disabled: playlists.prevPageToken == null}" class="previous">
+                <a href="#" prevent-default ng-click="getPagedPlaylists(playlists.prevPageToken)">&larr; Previous</a>
+            </li>
+            <li ng-class="{disabled: playlists.nextPageToken == null}" class="next">
+                <a href="#" prevent-default ng-click="getPagedPlaylists(playlists.nextPageToken)">Next &rarr;</a>
+            </li>
+        </ul>
+
+        <!-- Saved Videos -->
+        <div>
+            <h4>Selected Playlist</h4>
+            <ul class="unstyled list-icons" ui-sortable ng-model="model.value">
+                <li ng-repeat="selectedItem in model.value track by $index">
+                    <i class="icon icon-navigation handle"></i>
+                    <a href="#" prevent-default ng-click="removeVideo($index)">
+                        <i class="icon icon-delete red hover-show"></i>
+                        <i class="icon icon-video hover-hide"></i>
+                        {{selectedItem.Title}}
+                    </a>
+
+                </li>
+            </ul>
+
+            <div ng-if="model.config.debug === '1'">
+                {{ model.value | json }}
+            </div>
+        </div>
+
+    </div>
+    
+
 
 </div>

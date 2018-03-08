@@ -271,8 +271,10 @@
     <Compile Include="Models\SelectedVideo.cs" />
     <Compile Include="Models\SimpleYouTube.cs" />
     <Compile Include="Models\YouTube.cs" />
+    <Compile Include="Models\YoutubeVideoItem.cs" />
     <Compile Include="PackageActions\AssemblyBinding.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Providers\HttpCacheProvider.cs" />
     <Compile Include="UmbracoStartup.cs" />
     <Compile Include="SimpleYouTubeValueConverter.cs" />
     <Compile Include="YouTubeHelper.cs" />

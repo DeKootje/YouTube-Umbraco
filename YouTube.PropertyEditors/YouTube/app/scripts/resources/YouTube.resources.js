@@ -12,6 +12,10 @@ function ($http) {
         getChannelVideos: function (channelId, orderBy, searchQuery, pageToken) {
             return $http.post(apiUrl + "VideosForChannel", { pageToken: pageToken, channelId: channelId, searchQuery: searchQuery, orderBy: orderBy });
         },
+		
+		getChannelPlaylists: function (channelId, orderBy, searchQuery, pageToken) {
+            return $http.post(apiUrl + "PlaylistsForChannel", { pageToken: pageToken, channelId: channelId, searchQuery: searchQuery, orderBy: orderBy });
+        },
 
         queryUsernameForChannel: function(usernameToQuery) {
         	return $http.get(apiUrl + "ChannelFromUsername?username=" + usernameToQuery);

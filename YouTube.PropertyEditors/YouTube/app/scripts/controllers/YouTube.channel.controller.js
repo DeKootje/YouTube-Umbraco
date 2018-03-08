@@ -1,6 +1,6 @@
 angular.module("umbraco").controller("YouTube.channel.controller", function ($scope, YouTubeResource, angularHelper) {
 
-    function debug(message, object){
+   function debug(message, object) {
         //Check we have the console object
         //Some older browsers don't
         if (typeof console === "object") {
@@ -8,58 +8,42 @@ angular.module("umbraco").controller("YouTube.channel.controller", function ($sc
             //In this case a string not a real number of 1 or 0
             var isDebug = $scope.model.config.debug;
 
-            if(isDebug === "1"){
+            if (isDebug === "1") {
                 console.log(message, object);
             }
         }
     }
 
     //Set Has Videos to false - until we get some back from API call
-    $scope.hasVideos        = false;
-    $scope.notFoundVideos   = false;
+    $scope.hasVideos = false;
+    $scope.notFoundVideos = false;
+
+    $scope.hasPlaylists = false;
+    $scope.notFoundPlaylists = false;
+
+    $scope.searchQuery = '';
+    $scope.searchQueryPlaylist = '';
 
     //Debug message
     debug("Scope Model on init", $scope.model);
+    debug("Scope Model Config mode", $scope.model.config.mode);
 
     debug("Scope Model Config minmax", $scope.model.config.minmax);
 
     //Set to be default empty array or value saved
     $scope.model.value = $scope.model.value ? $scope.model.value : [];
 
-
-    //Try & get videos for grid on Page Load
-    YouTubeResource.getChannelVideos($scope.model.config.channel.youtube.channelId, $scope.model.config.orderBy, null, null).then(function(response) {
-
-        //Debug message
-        debug("Response Data on init", response.data);
-
-        //Check we have items back from YouTube
-        if (response.data.items.length > 0) {
-
-            //Videos
-            $scope.videos = response.data;
-
-            //Now we can show the grid of videos
-            $scope.hasVideos        = true;
-            $scope.notFoundVideos   = false;
-        }
-        else {
-            //No videos - may be searching & found no results
-            $scope.notFoundVideos   = true;
-        }
-
-    });
-
-    $scope.toggleVideo = function(video) {
+    $scope.toggleVideo = function (video) {
 
         //Create new JSON object as we don't need full object passed in here
         var newVideoObject = {
-            "id": video.id.videoId,
-            "title": video.snippet.title
+            "Id": video.id.videoId,
+            "Type": "Video",
+            "Title": video.snippet.title
         };
 
         //See if we can find the item or not in the array
-        var tryFindItem = $scope.model.value.map(function (e) { return e.id; }).indexOf(newVideoObject.id);
+        var tryFindItem = $scope.model.value.map(function (e) { return e.Id; }).indexOf(newVideoObject.Id);
 
         //Check validity of min & max items
         var minValid = isMinValid();
@@ -67,7 +51,7 @@ angular.module("umbraco").controller("YouTube.channel.controller", function ($sc
 
         //Check to add or remove item
         if (tryFindItem !== -1) {
-            
+
             //Found the item in the array
 
             //Lets remove it at the index we found it at & remove the single item only
@@ -79,6 +63,38 @@ angular.module("umbraco").controller("YouTube.channel.controller", function ($sc
             //Adding item to the collection
             //Item does not exist in the array, let's add it & all OK with validation :)
             $scope.model.value.push(newVideoObject);
+        }
+    };
+
+    $scope.togglePlaylist = function (playlist) {
+        //Create new JSON object as we don't need full object passed in here
+        var newPlaylistObject = {
+            "Id": playlist.id.playlistId,
+            "Type": "Playlist",
+            "Title": playlist.snippet.title
+        };
+
+        //See if we can find the item or not in the array
+        var tryFindItem = $scope.model.value.map(function (e) { return e.Id; }).indexOf(newPlaylistObject.Id);
+
+        //Check validity of min & max items
+        var minValid = isMinValid();
+        var maxValid = isMaxValid();
+
+        //Check to add or remove item
+        if (tryFindItem !== -1) {
+
+            //Found the item in the array
+
+            //Lets remove it at the index we found it at & remove the single item only
+            $scope.model.value.splice(tryFindItem, 1);
+
+        }
+        else {
+
+            //Adding item to the collection
+            //Item does not exist in the array, let's add it & all OK with validation :)
+            $scope.model.value.push(newPlaylistObject);
         }
     };
 
@@ -96,7 +112,6 @@ angular.module("umbraco").controller("YouTube.channel.controller", function ($sc
     };
 
     $scope.getVideos = function (pagedToken) {
-
         //Set Has Videos to false - until we get some back from API call
         $scope.hasVideos = false;
 
@@ -124,6 +139,44 @@ angular.module("umbraco").controller("YouTube.channel.controller", function ($sc
         });
     };
 
+    $scope.getPagedPlaylists = function (pagedToken) {
+
+        //Check we have a paged token
+        //May be at beginning or end of list
+        //If so don't do anything
+        if (pagedToken == null) {
+            return;
+        }
+
+        //Call getPlaylists() with our page token
+        this.getPlaylists(pagedToken);
+    };
+
+    $scope.getPlaylists = function (pagedToken) {
+        $scope.hasPlaylists = false;
+
+        YouTubeResource.getChannelPlaylists($scope.model.config.channel.youtube.channelId, $scope.model.config.orderBy, $scope.searchQueryPlaylist, pagedToken).then(function (response) {
+
+            //Debug message
+            debug("Response Data from GetPlaylists()", response.data);
+
+            //Check we have items back from YouTube
+            if (response.data.items.length > 0) {
+
+                //Videos
+                $scope.playlists = response.data;
+
+                //Now we can show the grid of videos
+                $scope.hasPlaylists = true;
+                $scope.notFoundPlaylists = false;
+            }
+            else {
+                //No videos - may be searching & found no results
+                $scope.notFoundPlaylists = true;
+            }
+
+        });
+    }
 
     $scope.removeVideo = function(videoIndex) {
         debug("Remove video at index",videoIndex);
@@ -132,9 +185,14 @@ angular.module("umbraco").controller("YouTube.channel.controller", function ($sc
         $scope.model.value.splice(videoIndex, 1);
     };
 
-    $scope.isInArray = function (videoId) {
+    $scope.isInArray = function (id) {
+		
+		if(!$scope.model.value.length) {
+			return false;
+		}
+		
         //See if we can find the item or not in the array
-        var tryFindItem = $scope.model.value.map(function (e) { return e.id; }).indexOf(videoId);
+        var tryFindItem = $scope.model.value.map(function (e) { return e.Id; }).indexOf(id);
 
         if (tryFindItem !== -1) {
             //Found it in the array
@@ -227,5 +285,59 @@ angular.module("umbraco").controller("YouTube.channel.controller", function ($sc
         //Flag not enabled to check for Min items, so always valid
         return true;
     }
+
+    $scope.init = function () {
+
+        if ($scope.model.config.mode == 'video') {
+            //Try & get videos for grid on Page Load
+            YouTubeResource.getChannelVideos($scope.model.config.channel.youtube.channelId, $scope.model.config.orderBy, null, null).then(function (response) {
+
+                //Debug message
+                debug("Response Data on init", response.data);
+
+                //Check we have items back from YouTube
+                if (response.data.items.length > 0) {
+
+                    //Videos
+                    $scope.videos = response.data;
+
+                    //Now we can show the grid of videos
+                    $scope.hasVideos = true;
+                    $scope.notFoundVideos = false;
+                }
+                else {
+                    //No videos - may be searching & found no results
+                    $scope.notFoundVideos = true;
+                }
+
+            });
+        } else if ($scope.model.config.mode == 'playlist') {
+            //Try & get videos for grid on Page Load
+            YouTubeResource.getChannelPlaylists($scope.model.config.channel.youtube.channelId, $scope.model.config.orderBy, null, null).then(function (response) {
+
+                //Debug message
+                debug("Response Data on init", response.data);
+
+                //Check we have items back from YouTube
+                if (response.data.items.length > 0) {
+
+                    //Videos
+                    $scope.playlists = response.data;
+
+                    //Now we can show the grid of videos
+                    $scope.hasPlaylists = true;
+                    $scope.notFoundPlaylists = false;
+                }
+                else {
+                    //No videos - may be searching & found no results
+                    $scope.notFoundPlaylists = true;
+                }
+
+            });
+        } else {
+            alert("Select a mode!");
+        }
+
+    };
 
 });
