@@ -126,7 +126,7 @@ angular.module("umbraco").controller("YouTube.channel.controller", function ($sc
         $scope.hasVideos = false;
 
         //Do new request to API
-        YouTubeResource.getChannelVideos($scope.model.config.channel.youtube.channelId, $scope.model.config.orderBy, $scope.searchQuery, pagedToken).then(function (response) {
+        YouTubeResource.getChannelVideos($scope.model.config.channel.channelId, $scope.model.config.orderBy, $scope.searchQuery, pagedToken).then(function (response) {
 
             //Debug message
             debug("Response Data from GetVideos()", response.data);
@@ -166,7 +166,7 @@ angular.module("umbraco").controller("YouTube.channel.controller", function ($sc
         $scope.hasPlaylists = false;
         console.log($scope);
 
-        YouTubeResource.getChannelPlaylists($scope.model.config.channel.youtube.channelId, $scope.model.config.orderBy, $scope.searchQueryPlaylist, pagedToken).then(function (response) {
+        YouTubeResource.getChannelPlaylists($scope.model.config.channel.channelId, $scope.model.config.orderBy, $scope.searchQueryPlaylist, pagedToken).then(function (response) {
 
             //Debug message
             debug("Response Data from GetPlaylists()", response.data);
@@ -297,7 +297,7 @@ angular.module("umbraco").controller("YouTube.channel.controller", function ($sc
 
         if ($scope.model.config.mode == 'video') {
             //Try & get videos for grid on Page Load
-            YouTubeResource.getChannelVideos($scope.model.config.channel.youtube.channelId, $scope.model.config.orderBy, null, null).then(function (response) {
+            YouTubeResource.getChannelVideos($scope.model.config.channel.channelId, $scope.model.config.orderBy, null, null).then(function (response) {
 
                 //Debug message
                 debug("Response Data on init", response.data);
@@ -320,7 +320,7 @@ angular.module("umbraco").controller("YouTube.channel.controller", function ($sc
             });
         } else if ($scope.model.config.mode == 'playlist') {
             //Try & get videos for grid on Page Load
-            YouTubeResource.getChannelPlaylists($scope.model.config.channel.youtube.channelId, $scope.model.config.orderBy, null, null).then(function (response) {
+            YouTubeResource.getChannelPlaylists($scope.model.config.channel.channelId, $scope.model.config.orderBy, null, null).then(function (response) {
 
                 //Debug message
                 debug("Response Data on init", response.data);
